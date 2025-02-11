@@ -2,39 +2,39 @@ package appserver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
+	"net/http"
 	"sync"
 	"sync/atomic"
-)
 
-type server interface {
-	Close() error
-	Serve(net.Listener) error
-}
+	httpserver "github.com/qreaqtor/api-avito-shop/pkg/httpServer"
+)
 
 type AppServer struct {
 	started atomic.Bool
 
 	ctx context.Context
 
-	server server
+	server *httpserver.HTTPServer
 
 	port int
 
-	errChan chan error
+	waitErrChan  chan error
+	serveErrChan chan error
 
 	closers []io.Closer
 }
 
-// addr is a network address that must match the form "host:port"
-func NewAppServer(ctx context.Context, server server, port int) *AppServer {
+func NewAppServer(ctx context.Context, handler http.Handler, env string, port int) *AppServer {
 	return &AppServer{
-		ctx:     ctx,
-		port:    port,
-		server:  server,
-		errChan: make(chan error),
+		ctx:          ctx,
+		port:         port,
+		server:       httpserver.NewHTTPServer(handler, env),
+		waitErrChan:  make(chan error),
+		serveErrChan: make(chan error, 1),
 	}
 }
 
@@ -54,49 +54,51 @@ func (a *AppServer) Start() error {
 		return err
 	}
 
-	errChan := make(chan error)
+	go a.serve(l)
 
-	go func() {
-		defer close(errChan)
-
-		err := a.server.Serve(l)
-		if err != nil {
-			errChan <- err
-		}
-	}()
-
-	go func(ctx context.Context) {
-		defer func() {
-			err := l.Close()
-			if err != nil {
-				a.errChan <- err
-			}
-
-			err = a.server.Close()
-			if err != nil {
-				a.errChan <- err
-			}
-
-			close(a.errChan)
-		}()
+	go func(ctx context.Context, l net.Listener) {
+		defer a.close(l)
 
 		select {
 		case <-ctx.Done():
 			return
-		case err := <-errChan:
-			a.errChan <- err
+		case err := <-a.serveErrChan:
+			a.waitErrChan <- err
 			return
 		}
-	}(a.ctx)
+	}(a.ctx, l)
 
 	return nil
 }
 
+func (a *AppServer) serve(l net.Listener) {
+	defer close(a.serveErrChan)
+
+	err := a.server.Serve(l)
+	if err != nil {
+		a.serveErrChan <- err
+	}
+}
+
+func (a *AppServer) close(l net.Listener) {
+	err := l.Close()
+	if err != nil {
+		a.waitErrChan <- err
+	}
+
+	err = a.server.Close()
+	if err != nil {
+		a.waitErrChan <- err
+	}
+
+	close(a.waitErrChan)
+}
+
 // waiting when all goroutines is done and return serve errors
-func (a *AppServer) wait() []error {
+func (a *AppServer) waitErrors() []error {
 	errs := make([]error, 0)
 
-	for err := range a.errChan {
+	for err := range a.waitErrChan {
 		errs = append(errs, err)
 	}
 
@@ -104,8 +106,8 @@ func (a *AppServer) wait() []error {
 }
 
 // waiting when all goroutines is done and return close and serve erros
-func (a *AppServer) WaitAndClose() []error {
-	errs := a.wait()
+func (a *AppServer) WaitAndClose() error {
+	errs := a.waitErrors()
 
 	wg := sync.WaitGroup{}
 	mu := sync.Mutex{}
@@ -127,5 +129,5 @@ func (a *AppServer) WaitAndClose() []error {
 
 	wg.Wait()
 
-	return errs
+	return errors.Join(errs...)
 }

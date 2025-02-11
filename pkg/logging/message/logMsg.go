@@ -11,8 +11,6 @@ type LogMsg struct {
 	Status int
 }
 
-// Возвращает структуру, которая пишет логи с помощью logger.
-// Остальные поля - информация, которая будет выводиться.
 func NewLogMsg(url, method string) *LogMsg {
 	return &LogMsg{
 		URL:    url,

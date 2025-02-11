@@ -4,6 +4,8 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+
+	comlog "github.com/qreaqtor/api-avito-shop/pkg/logging"
 )
 
 type HTTPServer struct {
@@ -11,8 +13,10 @@ type HTTPServer struct {
 }
 
 // return http server with added recovery middleware
-// used default slog.Logger value
-func NewHTTPServer(handler http.Handler) *HTTPServer {
+// used default slog.Logger{}
+func NewHTTPServer(handler http.Handler, env string) *HTTPServer {
+	comlog.SetLogger(env)
+
 	return &HTTPServer{
 		server: &http.Server{
 			Handler: panicMiddleware(handler),
