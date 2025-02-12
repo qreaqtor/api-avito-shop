@@ -15,7 +15,7 @@ func StartNewApp(ctx context.Context, cfg config.Config) (*App, error) {
 
 	router := mux.NewRouter()
 
-	conn, err := postgres.GetPostgresConnPool(ctx, cfg.Postgres)
+	connPool, err := postgres.GetPostgresConnPool(ctx, cfg.Postgres)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func StartNewApp(ctx context.Context, cfg config.Config) (*App, error) {
 	//api := api.NewContainersAPI(uc)
 	//api.Register(router)
 
-	appServer := appserver.NewAppServer(ctx, router, cfg.Env, int(cfg.Port)).WithClosers(conn)
+	appServer := appserver.NewAppServer(ctx, router, cfg.Env, int(cfg.Port)).WithClosers(connPool)
 
 	app := &App{
 		server: appServer,
@@ -37,17 +37,4 @@ func StartNewApp(ctx context.Context, cfg config.Config) (*App, error) {
 	}
 
 	return app, nil
-}
-
-type closer interface {
-	Close()
-}
-
-type Closer struct {
-	Cl closer
-}
-
-func (c *Closer) Close() error {
-	c.Cl.Close()
-	return nil
 }
