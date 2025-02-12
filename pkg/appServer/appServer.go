@@ -35,12 +35,8 @@ func NewAppServer(ctx context.Context, handler http.Handler, env string, port in
 		server:       httpserver.NewHTTPServer(handler, env),
 		waitErrChan:  make(chan error),
 		serveErrChan: make(chan error, 1),
+		closers:      make([]io.Closer, 0),
 	}
-}
-
-func (a *AppServer) WithClosers(closers []io.Closer) *AppServer {
-	a.closers = closers
-	return a
 }
 
 // start listen
