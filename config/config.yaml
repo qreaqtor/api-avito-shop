@@ -1,2 +1,8 @@
 env: dev
 app_port: 8080
+
+postgres:
+  max_open_conn: 100
+  max_idle_conn: 50
+  max_conn_lifetime: 30m
+  max_conn_idle_time: 5m
