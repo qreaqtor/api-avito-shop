@@ -8,9 +8,9 @@ import (
 type UserSchema struct {
 	bun.BaseModel `bun:"table:users"`
 
-	Name     string `bun:",notnull"`
-	Password string `bun:",notnull"`
-	Coins    int    `bun:",notnull"`
+	Name     string `bun:"name,notnull"`
+	Password string `bun:"password,notnull"`
+	Coins    int    `bun:"coins,notnull"`
 }
 
 func NewUserSchema(user *models.User) *UserSchema {

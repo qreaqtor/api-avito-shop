@@ -5,4 +5,5 @@ type Config struct {
 	Port uint   `yaml:"app_port" env-required:"true"`
 
 	Postgres PostgresConfig `yaml:"postgres"`
+	Auth     AuthConfig     `yaml:"auth"`
 }

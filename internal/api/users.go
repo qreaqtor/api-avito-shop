@@ -17,7 +17,7 @@ const (
 )
 
 type userService interface {
-	CheckAuth(context.Context, models.AuthInfo) (models.Token, error)
+	CheckAuth(context.Context, *models.AuthInfo) (*models.Token, error)
 }
 
 type UsersAPI struct {
@@ -26,8 +26,10 @@ type UsersAPI struct {
 	users userService
 }
 
-func NewUsersAPI() *UsersAPI {
-	return &UsersAPI{}
+func NewUsersAPI(users userService) *UsersAPI {
+	return &UsersAPI{
+		users: users,
+	}
 }
 
 func (u *UsersAPI) Register(r *mux.Router) {
@@ -50,7 +52,7 @@ func (u *UsersAPI) auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := u.users.CheckAuth(r.Context(), *authRequest)
+	token, err := u.users.CheckAuth(r.Context(), authRequest)
 	if err != nil {
 		httprocess.WriteError(w, logMsg.WithText(unathorized).WithStatus(http.StatusUnauthorized))
 		return

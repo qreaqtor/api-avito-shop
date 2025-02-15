@@ -1,2 +1,6 @@
 env: local
 app_port: 8080
+
+auth:
+  password_cost_bcrypt: 10
+  token_lifespan: 10m

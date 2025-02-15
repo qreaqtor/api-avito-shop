@@ -11,6 +11,15 @@ import (
 type repoUser interface {
 	GetPassword(ctx context.Context, username string) (string, error)
 	CreateUser(ctx context.Context, user *models.User) error
+	GetUser(ctx context.Context, username string) (*models.UserRead, error)
+}
+
+type repoItems interface {
+	GetItems(ctx context.Context, username string) ([]*models.Item, error)
+}
+
+type repoTransactions interface {
+	GetUserCoinHistory(ctx context.Context, username string) (models.History, error)
 }
 
 type tokenManager interface {
@@ -20,13 +29,17 @@ type tokenManager interface {
 }
 
 type UserUC struct {
-	users repoUser
-
-	auth tokenManager
+	users        repoUser
+	auth         tokenManager
+	items        repoItems
+	transactions repoTransactions
 }
 
-func NewUserUC() *UserUC {
-	return &UserUC{}
+func NewUserUC(users repoUser, auth tokenManager, items repoItems, transactions repoTransactions) *UserUC {
+	return &UserUC{
+		users: users,
+		auth:  auth,
+	}
 }
 
 func (u *UserUC) CheckAuth(ctx context.Context, auth *models.AuthInfo) (*models.Token, error) {
@@ -61,4 +74,28 @@ func (u *UserUC) createUser(ctx context.Context, auth *models.AuthInfo) error {
 	}
 
 	return u.users.CreateUser(ctx, user)
+}
+
+func (u *UserUC) GetUser(ctx context.Context, username string) (*models.UserInfo, error) {
+	userRead, err := u.users.GetUser(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+
+	items, err := u.items.GetItems(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+
+	history, err := u.transactions.GetUserCoinHistory(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+
+	userInfo := &models.UserInfo{
+		Coins:       userRead.Coins,
+		Inventory:   items,
+		CoinHistory: history,
+	}
+	return userInfo, nil
 }

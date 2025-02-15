@@ -6,3 +6,7 @@ postgres:
   max_idle_conn: 50
   max_conn_lifetime: 30m
   max_conn_idle_time: 5m
+
+auth:
+  password_cost_bcrypt: 10
+  token_lifespan: 1h

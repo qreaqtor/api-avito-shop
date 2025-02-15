@@ -48,3 +48,19 @@ func (u *UsersRepo) GetPassword(ctx context.Context, username string) (string, e
 
 	return user.Password, err
 }
+
+func (u *UsersRepo) GetUser(ctx context.Context, username string) (*models.UserRead, error) {
+	db := u.provider.GetQueryEngine(ctx)
+
+	userReadSchema := new(schema.UserReadSchema)
+
+	err := db.NewSelect().
+		Model(userReadSchema).
+		Where("name = ?", username).
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, repoerr.ErrNotFound
+	}
+
+	return userReadSchema.ToDomainUserRead(), err
+}

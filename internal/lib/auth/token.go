@@ -4,18 +4,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/qreaqtor/api-avito-shop/internal/config"
 	"github.com/qreaqtor/api-avito-shop/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
-
-type TokenManager struct {
-	cfg config.AuthConfig
-}
-
-func NewTokenManager() *TokenManager {
-	return &TokenManager{}
-}
 
 func (tm *TokenManager) CheckPassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword(
@@ -25,15 +16,14 @@ func (tm *TokenManager) CheckPassword(hashedPassword, password string) error {
 }
 
 func (tm *TokenManager) GenerateToken(username string) (*models.Token, error) {
-	claims := jwt.MapClaims{}
+	iat := time.Now()
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": username,
+		"iat":      iat.Unix(),
+		"exp":      iat.Add(tm.cfg.TokenLifespan).Unix(),
+	})
 
-	claims["authorized"] = true
-	claims["username"] = username
-	claims["exp"] = time.Now().Add(tm.cfg.TokenLifespan).Unix()
-
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	authToken, err := jwtToken.SignedString([]byte(tm.cfg.Secret))
+	authToken, err := jwtToken.SignedString([]byte(tm.cfg.SigningKey))
 	if err != nil {
 		return nil, err
 	}
@@ -45,6 +35,6 @@ func (tm *TokenManager) GenerateToken(username string) (*models.Token, error) {
 }
 
 func (tm *TokenManager) GetHashedPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), tm.cfg.PasswordCostBcrypt)
 	return string(hashedPassword), err
 }
