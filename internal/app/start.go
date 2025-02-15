@@ -9,7 +9,7 @@ import (
 	"github.com/qreaqtor/api-avito-shop/internal/lib/auth"
 	"github.com/qreaqtor/api-avito-shop/internal/lib/postgres/transactor"
 	"github.com/qreaqtor/api-avito-shop/internal/repo/postgres"
-	transactionsrepo "github.com/qreaqtor/api-avito-shop/internal/repo/postgres/transactions"
+	itemsrepo "github.com/qreaqtor/api-avito-shop/internal/repo/postgres/items"
 	transrepo "github.com/qreaqtor/api-avito-shop/internal/repo/postgres/transactions"
 	usersrepo "github.com/qreaqtor/api-avito-shop/internal/repo/postgres/users"
 	usersuc "github.com/qreaqtor/api-avito-shop/internal/usecase/users"
@@ -31,9 +31,10 @@ func StartNewApp(ctx context.Context, cfg config.Config) (*App, error) {
 	tokenManager := auth.NewTokenManager(cfg.Auth)
 
 	usersrepo := usersrepo.NewUserRepo(transactionManager)
-	transactionsRepo := transrepo.NewtransactionsRepo(transactionManager)
+	transactionsRepo := transrepo.NewTransactionsRepo(transactionManager)
+	itemsrepo := itemsrepo.NewItemsRepo(transactionManager)
 
-	usersUC := usersuc.NewUserUC(usersrepo, tokenManager, transactionsRepo)
+	usersUC := usersuc.NewUserUC(usersrepo, tokenManager, itemsrepo, transactionsRepo)
 	usersApi := api.NewUsersAPI(usersUC)
 	usersApi.Register(router)
 

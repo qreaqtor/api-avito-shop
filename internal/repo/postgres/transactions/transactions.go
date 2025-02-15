@@ -12,7 +12,7 @@ type TransactionsRepo struct {
 	provider transactor.QueryEngineProvider
 }
 
-func NewtransactionsRepo(provider transactor.QueryEngineProvider) *TransactionsRepo {
+func NewTransactionsRepo(provider transactor.QueryEngineProvider) *TransactionsRepo {
 	return &TransactionsRepo{
 		provider: provider,
 	}

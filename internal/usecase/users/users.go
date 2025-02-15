@@ -19,7 +19,7 @@ type repoItems interface {
 }
 
 type repoTransactions interface {
-	GetUserCoinHistory(ctx context.Context, username string) (models.History, error)
+	GetUserCoinHistory(ctx context.Context, username string) (*models.History, error)
 }
 
 type tokenManager interface {
