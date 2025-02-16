@@ -8,16 +8,16 @@ import (
 type TransactionSchema struct {
 	bun.BaseModel `bun:"table:transactions"`
 
-	FromUser string `bun:"from_user,notnull"`
-	ToUser   string `bun:"to_user,notnull"`
+	FromUser string `bun:"from_user"`
+	ToUser   string `bun:"to_user"`
 	Amount   uint   `bun:"amount,notnull"`
 }
 
-func NewTransactionSchema(transactionSent models.TransactionSent, fromUser string) *TransactionSchema {
+func NewTransactionSchema(transaction *models.Transaction) *TransactionSchema {
 	return &TransactionSchema{
-		FromUser: fromUser,
-		ToUser:   transactionSent.ToUser,
-		Amount:   transactionSent.Amount,
+		FromUser: transaction.FromUser,
+		ToUser:   transaction.ToUser,
+		Amount:   transaction.Amount,
 	}
 }
 

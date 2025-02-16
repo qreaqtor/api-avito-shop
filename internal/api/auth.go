@@ -8,6 +8,10 @@ import (
 	logmsg "github.com/qreaqtor/api-avito-shop/pkg/logging/message"
 )
 
+const (
+	unathorized = "unathorized"
+)
+
 func (u *UsersAPI) auth(w http.ResponseWriter, r *http.Request) {
 	logMsg := logmsg.NewLogMsg(r.RequestURI, r.Method)
 
@@ -31,7 +35,7 @@ func (u *UsersAPI) auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httprocess.WriteData(w,
-		logMsg.WithText(ok).WithStatus(http.StatusOK),
+		logMsg.WithText(success).WithStatus(http.StatusOK),
 		token,
 	)
 }

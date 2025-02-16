@@ -1,10 +1,12 @@
 package auth
 
-import "context"
+import (
+	"context"
+)
 
 func ExtractUsername(ctx context.Context) (string, error) {
 	username, ok := ctx.Value(usernameCtxKey).(string)
-	if !ok {
+	if !ok || username == "" {
 		return "", errNoUserInContext
 	}
 	return username, nil

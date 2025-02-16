@@ -1,10 +1,10 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS transactions (
-    from_user varchar(32) NOT NULL references users(name),
-    to_user varchar(32) NOT NULL references users(name),
-    amount integer NOT NULL,
-    created_at TIMESTAMP DEFAULT now()
+    "from_user" varchar(32) references users("username"),
+    "to_user" varchar(32) references users("username"),
+    "amount" integer NOT NULL,
+    "created_at" TIMESTAMP DEFAULT now()
 );
 -- +goose StatementEnd
 

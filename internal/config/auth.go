@@ -9,5 +9,5 @@ type AuthConfig struct {
 }
 
 type JWT struct {
-	SigningKey string `env:"JWT_SIGNING_KEY" env-required:"true"`
+	SigningKey string `env:"JWT_SIGNING_KEY" env-default:"secret"`
 }

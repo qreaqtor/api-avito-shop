@@ -6,21 +6,21 @@ import (
 	"net/http"
 )
 
-type tokenManager interface {
+type TokenManager interface {
 	GetContextWithUsername(ctx context.Context, headerValue string) (context.Context, error)
 }
 
 type AuthMiddleware struct {
-	auth tokenManager
+	auth TokenManager
 }
 
-func NewAuthMiddleware(auth tokenManager) *AuthMiddleware {
+func NewAuthMiddleware(auth TokenManager) *AuthMiddleware {
 	return &AuthMiddleware{
 		auth: auth,
 	}
 }
 
-func (am *AuthMiddleware) AuthMiddleware(next http.Handler) http.Handler {
+func (am *AuthMiddleware) NextFunc(next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeaderValue := r.Header.Get("Authorization")
 

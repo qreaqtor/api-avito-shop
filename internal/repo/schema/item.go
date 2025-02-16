@@ -8,13 +8,27 @@ import (
 type ItemSchema struct {
 	bun.BaseModel `bun:"table:inventory_items"`
 
-	MerchName string `bun:"merch_name,notnull"`
-	Quantity  uint   `bun:"quantity,notnull"`
+	Username  string `bun:"username"`
+	MerchType string `bun:"merch_type"`
 }
 
-func (i *ItemSchema) ToDomainItem() *models.Item {
-	return &models.Item{
-		Type: i.MerchName,
-		Quantity: i.Quantity,
+func NewItemSchema(item *models.Item) *ItemSchema {
+	return &ItemSchema{
+		Username:  item.Username,
+		MerchType: item.MerchName,
+	}
+}
+
+type InventoryItemSchema struct {
+	bun.BaseModel `bun:"table:inventory_items"`
+
+	MerchType string `bun:"merch_type"`
+	Count     int    `bun:"count"`
+}
+
+func (i *InventoryItemSchema) ToDomainItem() *models.InventoryItem {
+	return &models.InventoryItem{
+		ItemType: i.MerchType,
+		Quantity: uint(i.Count),
 	}
 }

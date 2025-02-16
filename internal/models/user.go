@@ -1,8 +1,8 @@
 package models
 
 type UserInfo struct {
-	Coins     uint    `json:"coins"`
-	Inventory []*Item `json:"inventory"`
+	Coins     uint             `json:"coins"`
+	Inventory []*InventoryItem `json:"inventory"`
 
 	CoinHistory *History `json:"coinHistory"`
 }

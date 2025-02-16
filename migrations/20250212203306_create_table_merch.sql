@@ -1,8 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS merch (
-    name varchar(255) PRIMARY KEY,
-    price integer NOT NULL,
+    "merch_type" varchar(255) PRIMARY KEY,
+    "price" integer NOT NULL,
+    "created_at" TIMESTAMP DEFAULT now()
 );
 -- +goose StatementEnd
 

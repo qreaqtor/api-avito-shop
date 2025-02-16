@@ -18,23 +18,36 @@ func NewItemsRepo(provider transactor.QueryEngineProvider) *ItemsRepo {
 	}
 }
 
-func (t *ItemsRepo) GetItems(ctx context.Context, username string) ([]*models.Item, error) {
-	db := t.provider.GetQueryEngine(ctx)
+func (i *ItemsRepo) GetItems(ctx context.Context, username string) ([]*models.InventoryItem, error) {
+	db := i.provider.GetQueryEngine(ctx)
 
-	itemsSchema := []schema.ItemSchema{}
+	inventory := []schema.InventoryItemSchema{}
 
 	err := db.NewSelect().
 		Model((*schema.ItemSchema)(nil)).
+		ColumnExpr("merch_type, count(*)").
 		Where("username = ?", username).
-		Scan(ctx, &itemsSchema)
+		Group("merch_type").
+		Scan(ctx, &inventory)
 	if err != nil {
 		return nil, err
 	}
 
-	items := make([]*models.Item, 0, len(itemsSchema))
-	for _, item := range itemsSchema {
+	items := make([]*models.InventoryItem, 0, len(inventory))
+	for _, item := range inventory {
 		items = append(items, item.ToDomainItem())
 	}
 
 	return items, nil
+}
+
+func (i *ItemsRepo) AddItem(ctx context.Context, item *models.Item) error {
+	db := i.provider.GetQueryEngine(ctx)
+
+	itemSchema := schema.NewItemSchema(item)
+
+	_, err := db.NewInsert().
+		Model(itemSchema).
+		Exec(ctx)
+	return err
 }

@@ -19,21 +19,13 @@ func NewLogMsg(url, method string) *LogMsg {
 }
 
 func (msg *LogMsg) WithText(text string) *LogMsg {
-	return &LogMsg{
-		Text:   text,
-		Status: msg.Status,
-		URL:    msg.URL,
-		Method: msg.Method,
-	}
+	msg.Text = text
+	return msg
 }
 
 func (msg *LogMsg) WithStatus(status int) *LogMsg {
-	return &LogMsg{
-		Text:   msg.Text,
-		Status: status,
-		URL:    msg.URL,
-		Method: msg.Method,
-	}
+	msg.Status = status
+	return msg
 }
 
 func (msg *LogMsg) Info() {

@@ -4,41 +4,30 @@ import (
 	"context"
 	"errors"
 
+	"github.com/qreaqtor/api-avito-shop/internal/lib/postgres/transactor"
 	"github.com/qreaqtor/api-avito-shop/internal/models"
 	repoerr "github.com/qreaqtor/api-avito-shop/internal/repo/err"
 )
 
-type repoUser interface {
-	GetPassword(ctx context.Context, username string) (string, error)
-	CreateUser(ctx context.Context, user *models.User) error
-	GetUser(ctx context.Context, username string) (*models.UserRead, error)
-}
-
-type repoItems interface {
-	GetItems(ctx context.Context, username string) ([]*models.Item, error)
-}
-
-type repoTransactions interface {
-	GetUserCoinHistory(ctx context.Context, username string) (*models.History, error)
-}
-
-type tokenManager interface {
-	GenerateToken(username string) (*models.Token, error)
-	CheckPassword(hashedPassword, password string) error
-	GetHashedPassword(password string) (string, error)
-}
-
 type UserUC struct {
+	auth tokenManager
+
+	tm *transactor.TransactionManager
+
+	merch        repoMerch
 	users        repoUser
-	auth         tokenManager
 	items        repoItems
 	transactions repoTransactions
 }
 
-func NewUserUC(users repoUser, auth tokenManager, items repoItems, transactions repoTransactions) *UserUC {
+func NewUserUC(deps UsersDependecnies) *UserUC {
 	return &UserUC{
-		users: users,
-		auth:  auth,
+		users:        deps.Users,
+		auth:         deps.Auth,
+		items:        deps.Items,
+		transactions: deps.Transactions,
+		tm:           deps.Tm,
+		merch:        deps.Merch,
 	}
 }
 
@@ -76,7 +65,7 @@ func (u *UserUC) createUser(ctx context.Context, auth *models.AuthInfo) error {
 	return u.users.CreateUser(ctx, user)
 }
 
-func (u *UserUC) GetUser(ctx context.Context, username string) (*models.UserInfo, error) {
+func (u *UserUC) GetUserInfo(ctx context.Context, username string) (*models.UserInfo, error) {
 	userRead, err := u.users.GetUser(ctx, username)
 	if err != nil {
 		return nil, err
@@ -98,4 +87,31 @@ func (u *UserUC) GetUser(ctx context.Context, username string) (*models.UserInfo
 		CoinHistory: history,
 	}
 	return userInfo, nil
+}
+
+func (u *UserUC) SendCoin(ctx context.Context, transaction *models.Transaction) error {
+	return u.tm.RunRepeatableRead(ctx, func(ctxTX context.Context) error {
+		err := u.users.TakeCoin(ctx, transaction.FromUser, transaction.Amount)
+		if err != nil {
+			return err
+		}
+
+		return u.transactions.CreateTransaction(ctx, transaction)
+	})
+}
+
+func (u *UserUC) BuyItem(ctx context.Context, item *models.Item) error {
+	return u.tm.RunRepeatableRead(ctx, func(ctxTX context.Context) error {
+		merchPrice, err := u.merch.GetPrice(ctx, item.MerchName)
+		if err != nil {
+			return err
+		}
+
+		err = u.users.TakeCoin(ctx, item.Username, merchPrice)
+		if err != nil {
+			return err
+		}
+
+		return u.items.AddItem(ctx, item)
+	})
 }

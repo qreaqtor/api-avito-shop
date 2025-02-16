@@ -9,6 +9,10 @@ up:
 down:
 	${COMPOSE} down
 
+.PHONY: down-clear
+down-clear:
+	${COMPOSE} down --rmi local --volumes
+
 .PHONY: up-infra
 up-infra:
 	${COMPOSE} up -d postgres migrations

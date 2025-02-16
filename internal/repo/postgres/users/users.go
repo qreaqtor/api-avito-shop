@@ -35,18 +35,17 @@ func (u *UsersRepo) CreateUser(ctx context.Context, user *models.User) error {
 func (u *UsersRepo) GetPassword(ctx context.Context, username string) (string, error) {
 	db := u.provider.GetQueryEngine(ctx)
 
-	user := new(schema.UserSchema)
-
+	var password string
 	err := db.NewSelect().
-		Model(user).
+		Model((*schema.UserSchema)(nil)).
 		Column("password").
-		Where("name = ?", username).
-		Scan(ctx)
+		Where("username = ?", username).
+		Scan(ctx, &password)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", repoerr.ErrNotFound
 	}
 
-	return user.Password, err
+	return password, err
 }
 
 func (u *UsersRepo) GetUser(ctx context.Context, username string) (*models.UserRead, error) {
@@ -56,11 +55,22 @@ func (u *UsersRepo) GetUser(ctx context.Context, username string) (*models.UserR
 
 	err := db.NewSelect().
 		Model(userReadSchema).
-		Where("name = ?", username).
+		Where("username = ?", username).
 		Scan(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, repoerr.ErrNotFound
 	}
 
 	return userReadSchema.ToDomainUserRead(), err
+}
+
+func (u *UsersRepo) TakeCoin(ctx context.Context, username string, amount uint) error {
+	db := u.provider.GetQueryEngine(ctx)
+
+	_, err := db.NewUpdate().
+		Model((*schema.UserReadSchema)(nil)).
+		Set("coins = coins - ?", amount).
+		Where("username = ?", username).
+		Exec(ctx)
+	return err
 }

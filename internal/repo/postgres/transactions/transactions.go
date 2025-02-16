@@ -42,3 +42,14 @@ func (t *TransactionsRepo) GetUserCoinHistory(ctx context.Context, username stri
 
 	return transactionsSchema.ToDomainHistory(username), nil
 }
+
+func (t *TransactionsRepo) CreateTransaction(ctx context.Context, transaction *models.Transaction) error {
+	db := t.provider.GetQueryEngine(ctx)
+
+	transactionSchema := schema.NewTransactionSchema(transaction)
+
+	_, err := db.NewInsert().
+		Model(transactionSchema).
+		Exec(ctx)
+	return err
+}
