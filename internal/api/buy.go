@@ -39,8 +39,8 @@ func (u *UsersAPI) buyItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httprocess.WriteData(w,
-		logMsg.WithText(success).WithStatus(http.StatusNoContent),
-		nil,
+		logMsg.WithText(success).WithStatus(http.StatusOK),
+		success,
 	)
 }
 
