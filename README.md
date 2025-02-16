@@ -4,8 +4,10 @@
 
 ## Deploy
 
-Docker-compose файл лежит в папке deployment, для запуска можно использовать команду из Makefile `make up` - она запустит манифест с необходимыми переменными окружения.
-Для завершения можно использовать также команду из Makefile `make down` или `make down-clear`, последняя очищает образы и тома связанные с текущим docker-compose файлом.
+Docker-compose файл лежит в папке deployment.
+Для запуска можно использовать `make up` команду из Makefile - она запустит манифест с необходимыми переменными окружения.
+Для завершения можно использовать также команду из Makefile `make down` или `make down-clear`, 
+последняя очищает образы и тома связанные с текущим docker-compose файлом.
 
 ## API
 
@@ -14,4 +16,8 @@ Docker-compose файл лежит в папке deployment, для запуск
 
 ## Docs
 
-Предоставленные файлы документации были скопированы и лежат в папке `./docs`, воспользоваться ими можно перейдя на [swagger editor](https://editor.swagger.io/) или запустив образ командой `docker run -p 8081:8080 -e SWAGGER_JSON=/api/schema.json -v $(pwd)/docs/schema.json:/api/schema.json swaggerapi/swagger-ui`
+Предоставленные файлы документации были скопированы и лежат в папке `./docs`, 
+воспользоваться ими можно перейдя на [swagger editor](https://editor.swagger.io/) или запустив образ командой
+```
+docker run -p 8081:8080 -e SWAGGER_JSON=/api/schema.json -v $(pwd)/docs/schema.json:/api/schema.json swaggerapi/swagger-ui
+```
