@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCheckAuth_UserExists(t *testing.T) {
+func TestCheckAuthUserExists(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -51,7 +51,7 @@ func TestCheckAuth_UserExists(t *testing.T) {
 	assert.Equal(t, token.AuthToken, token.AuthToken)
 }
 
-func TestCheckAuth_UserNotExists(t *testing.T) {
+func TestCheckAuthUserNotExists(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -162,8 +162,14 @@ func TestSendCoin(t *testing.T) {
 			return fn(ctxTX)
 		},
 	).Return(nil)
-	mockUsers.EXPECT().TakeCoin(ctx, transaction.FromUser, transaction.Amount).Return(nil)
-	mockTransactions.EXPECT().CreateTransaction(ctx, transaction).Return(nil)
+
+	mockUsers.EXPECT().
+		TakeCoin(ctx, transaction.FromUser, transaction.Amount).
+		Return(nil)
+
+	mockTransactions.EXPECT().
+		CreateTransaction(ctx, transaction).
+		Return(nil)
 
 	err := uuc.SendCoin(ctx, transaction)
 	assert.NoError(t, err)
