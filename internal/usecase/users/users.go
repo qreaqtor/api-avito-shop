@@ -9,6 +9,10 @@ import (
 	repoerr "github.com/qreaqtor/api-avito-shop/internal/repo/err"
 )
 
+var (
+	errBadTransaction = errors.New("bad transaction")
+)
+
 type UserUC struct {
 	auth tokenManager
 
@@ -90,6 +94,9 @@ func (u *UserUC) GetUserInfo(ctx context.Context, username string) (*models.User
 }
 
 func (u *UserUC) SendCoin(ctx context.Context, transaction *models.Transaction) error {
+	if transaction.FromUser == transaction.ToUser {
+		return errBadTransaction
+	}
 	return u.tm.RunRepeatableRead(ctx, func(ctxTX context.Context) error {
 		err := u.users.TakeCoin(ctx, transaction.FromUser, transaction.Amount)
 		if err != nil {

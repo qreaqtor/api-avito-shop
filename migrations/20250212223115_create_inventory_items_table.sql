@@ -2,7 +2,8 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS inventory_items (
     "username" varchar(32) references users("username"),
-    "merch_type" varchar(255) references merch("merch_type")
+    "merch_type" varchar(255) references merch("merch_type"),
+    "created_at" TIMESTAMP DEFAULT now()
 );
 -- +goose StatementEnd
 
