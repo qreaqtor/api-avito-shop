@@ -35,39 +35,3 @@ func TestBuyMerchSimple(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, buyResp.StatusCode)
 }
-
-// func TestBuyMerchUndefinedItem(t *testing.T) {
-// 	username := "userUndefinedMerch"
-
-// 	authResp, err := authenticate(username, testPassword)
-// 	assert.NoError(t, err)
-
-// 	item := "godzilla"
-
-// 	resp, err := buyItem(item, authResp)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-// }
-
-// func TestBuyMerchWithoutCoins(t *testing.T) {
-// 	username := "coinSpender"
-
-// 	authResp, err := authenticate(username, testPassword)
-// 	assert.NoError(t, err)
-
-// 	item := "powerbank"
-// 	itemPrice := 200
-// 	coinsSpend := 0
-
-// 	for range clientCoins / itemPrice {
-// 		resp, err := buyItem(item, authResp)
-// 		assert.NoError(t, err)
-// 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-// 		coinsSpend += itemPrice
-// 	}
-
-// 	resp, err := buyItem(item, authResp)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-// }

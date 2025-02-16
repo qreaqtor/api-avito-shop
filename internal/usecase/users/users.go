@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/qreaqtor/api-avito-shop/internal/lib/postgres/transactor"
 	"github.com/qreaqtor/api-avito-shop/internal/models"
 	repoerr "github.com/qreaqtor/api-avito-shop/internal/repo/err"
 )
@@ -16,7 +15,7 @@ var (
 type UserUC struct {
 	auth tokenManager
 
-	tm *transactor.TransactionManager
+	tm transactionManager
 
 	merch        repoMerch
 	users        repoUser

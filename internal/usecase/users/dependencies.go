@@ -3,7 +3,6 @@ package usersuc
 import (
 	"context"
 
-	"github.com/qreaqtor/api-avito-shop/internal/lib/postgres/transactor"
 	"github.com/qreaqtor/api-avito-shop/internal/models"
 )
 
@@ -34,10 +33,14 @@ type tokenManager interface {
 	GetHashedPassword(password string) (string, error)
 }
 
+type transactionManager interface {
+	RunRepeatableRead(ctx context.Context, fx func(ctxTX context.Context) error) error
+}
+
 type UsersDependecnies struct {
 	Auth tokenManager
 
-	Tm *transactor.TransactionManager
+	Tm transactionManager
 
 	Merch        repoMerch
 	Users        repoUser
